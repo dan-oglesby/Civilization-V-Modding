@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Global Stock Market: WORLD wonder (one per game), available after Banking.
+  Handled in Lua (StockMarket.lua + FinancialMarketsPanel.lua):
+    - Once it exists ANYWHERE, the stock market (Financial Markets) opens for ALL civilizations.
+    - Its owner skims a 2% cut of total stock-market activity each turn.
+  NOTE: building maintenance column is GoldMaintenance, NOT Maintenance (a bad column
+  silently drops the whole row and makes the wonder unbuildable).
+-->
+<GameData>
+
+  <BuildingClasses>
+    <Row>
+      <Type>BUILDINGCLASS_ECO_GLOBAL_STOCK_MARKET</Type>
+      <DefaultBuilding>BUILDING_ECO_GLOBAL_STOCK_MARKET</DefaultBuilding>
+      <Description>TXT_KEY_BUILDING_ECO_GLOBAL_STOCK_MARKET</Description>
+      <MaxGlobalInstances>1</MaxGlobalInstances>
+    </Row>
+  </BuildingClasses>
+
+  <Buildings>
+    <Row>
+      <Type>BUILDING_ECO_GLOBAL_STOCK_MARKET</Type>
+      <BuildingClass>BUILDINGCLASS_ECO_GLOBAL_STOCK_MARKET</BuildingClass>
+      <Cost>350</Cost>
+      <GoldMaintenance>3</GoldMaintenance>
+      <PrereqTech>TECH_BANKING</PrereqTech>
+      <Help>TXT_KEY_BUILDING_ECO_GLOBAL_STOCK_MARKET_HELP</Help>
+      <Description>TXT_KEY_BUILDING_ECO_GLOBAL_STOCK_MARKET</Description>
+      <Civilopedia>TXT_KEY_BUILDING_ECO_GLOBAL_STOCK_MARKET_PEDIA</Civilopedia>
+      <Strategy>TXT_KEY_BUILDING_ECO_GLOBAL_STOCK_MARKET_STRATEGY</Strategy>
+      <ArtDefineTag>ART_DEF_BUILDING_STOCK_EXCHANGE</ArtDefineTag>
+      <NukeImmune>true</NukeImmune>
+      <HurryCostModifier>-1</HurryCostModifier>
+      <MinAreaSize>-1</MinAreaSize>
+      <NeverCapture>true</NeverCapture>
+      <IconAtlas>BW_ATLAS_1</IconAtlas>
+      <PortraitIndex>56</PortraitIndex>
+      <WonderSplashImage>WonderConceptBigBen.dds</WonderSplashImage>
+      <WonderSplashAudio>AS2D_WONDER_SPEECH_BIG_BEN</WonderSplashAudio>
+    </Row>
+  </Buildings>
+
+  <Language_en_US>
+    <Row Tag="TXT_KEY_BUILDING_ECO_GLOBAL_STOCK_MARKET">
+      <Text>Global Stock Market</Text>
+    </Row>
+    <Row Tag="TXT_KEY_BUILDING_ECO_GLOBAL_STOCK_MARKET_HELP">
+      <Text>[COLOR_POSITIVE_TEXT]World wonder[ENDCOLOR] — only one may exist in the world. Building it [COLOR_POSITIVE_TEXT]opens the stock market (Financial Markets) for ALL civilizations[ENDCOLOR]. Its owner skims a [COLOR_POSITIVE_TEXT]2%[ENDCOLOR] cut of all stock-trading activity each turn.</Text>
+    </Row>
+    <Row Tag="TXT_KEY_BUILDING_ECO_GLOBAL_STOCK_MARKET_PEDIA">
+      <Text>A stock exchange is a marketplace where shares in companies are issued and traded, channeling private savings into industry. The Amsterdam exchange of 1602 — trading shares of the Dutch East India Company — is generally considered the first modern stock market, and the model soon spread to London, Paris, and the world.</Text>
+    </Row>
+    <Row Tag="TXT_KEY_BUILDING_ECO_GLOBAL_STOCK_MARKET_STRATEGY">
+      <Text>The Global Stock Market opens share trading for the entire world. Whoever builds it collects a small cut of all stock-market activity every turn — a steady, compounding income as the market matures. Found it early to bank the fees from every other civilization's trades.</Text>
+    </Row>
+  </Language_en_US>
+
+</GameData>

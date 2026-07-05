@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Commodity Exchange: WORLD wonder (one per game), available after Economics.
+  Mechanical effect (handled in CommodityMarket.lua and the panel):
+    - Once it exists ANYWHERE, the commodity market opens for ALL civilizations.
+    - Its owner gets +25% on their own commodity sales AND a cut of total commodity volume.
+-->
+<GameData>
+
+  <BuildingClasses>
+    <Row>
+      <Type>BUILDINGCLASS_COMMODITY_EXCHANGE</Type>
+      <DefaultBuilding>BUILDING_COMMODITY_EXCHANGE</DefaultBuilding>
+      <Description>TXT_KEY_BUILDING_COMMODITY_EXCHANGE</Description>
+      <MaxGlobalInstances>1</MaxGlobalInstances>
+    </Row>
+  </BuildingClasses>
+
+  <Buildings>
+    <Row>
+      <Type>BUILDING_COMMODITY_EXCHANGE</Type>
+      <BuildingClass>BUILDINGCLASS_COMMODITY_EXCHANGE</BuildingClass>
+      <Cost>400</Cost>
+      <GoldMaintenance>3</GoldMaintenance>
+      <PrereqTech>TECH_ECONOMICS</PrereqTech>
+      <Help>TXT_KEY_BUILDING_COMMODITY_EXCHANGE_HELP</Help>
+      <Description>TXT_KEY_BUILDING_COMMODITY_EXCHANGE</Description>
+      <Civilopedia>TXT_KEY_BUILDING_COMMODITY_EXCHANGE_PEDIA</Civilopedia>
+      <Strategy>TXT_KEY_BUILDING_COMMODITY_EXCHANGE_STRATEGY</Strategy>
+      <ArtDefineTag>ART_DEF_BUILDING_BANK</ArtDefineTag>
+      <NukeImmune>true</NukeImmune>
+      <HurryCostModifier>-1</HurryCostModifier>
+      <MinAreaSize>-1</MinAreaSize>
+      <NeverCapture>true</NeverCapture>
+      <IconAtlas>BW_ATLAS_1</IconAtlas>
+      <PortraitIndex>56</PortraitIndex>
+      <WonderSplashImage>WonderConceptColossus.dds</WonderSplashImage>
+      <WonderSplashAudio>AS2D_WONDER_SPEECH_THE_COLOSSUS</WonderSplashAudio>
+    </Row>
+  </Buildings>
+
+  <Language_en_US>
+    <Row Tag="TXT_KEY_BUILDING_COMMODITY_EXCHANGE">
+      <Text>Commodity Exchange</Text>
+    </Row>
+    <Row Tag="TXT_KEY_BUILDING_COMMODITY_EXCHANGE_HELP">
+      <Text>[COLOR_POSITIVE_TEXT]World wonder[ENDCOLOR] — only one may exist in the world. Building it [COLOR_POSITIVE_TEXT]opens the commodity market for ALL civilizations[ENDCOLOR]. Its owner earns [COLOR_POSITIVE_TEXT]+25%[ENDCOLOR] above market price on their own commodity sales, and skims a [COLOR_POSITIVE_TEXT]2%[ENDCOLOR] cut of every civilization's commodity trade volume each turn.</Text>
+    </Row>
+    <Row Tag="TXT_KEY_BUILDING_COMMODITY_EXCHANGE_PEDIA">
+      <Text>A Commodity Exchange is a marketplace where raw materials are bought and sold at prices set by global supply and demand. By formalizing this market, a civilization can extract maximum value from its natural resource surplus.</Text>
+    </Row>
+    <Row Tag="TXT_KEY_BUILDING_COMMODITY_EXCHANGE_STRATEGY">
+      <Text>Build the Commodity Exchange in a resource-rich city. It pays off most when you control strategic resources that other civilizations need — high global demand pushes prices up, and your 25% bonus amplifies the windfall.</Text>
+    </Row>
+    <Update>
+      <Set Text="Allows you to build the [COLOR_POSITIVE_TEXT]Windmill[ENDCOLOR] in cities built on flat land, increasing [ICON_PRODUCTION] Production.[NEWLINE][NEWLINE][COLOR_POSITIVE_TEXT]Commodity Exchange:[ENDCOLOR] Lets you build the [COLOR_POSITIVE_TEXT]Commodity Exchange[ENDCOLOR] world wonder. Once ANY civilization builds it, the [COLOR_POSITIVE_TEXT]Commodity Market[ENDCOLOR] opens for everyone (Additional Information menu): sell surplus [ICON_PRODUCTION] strategic and [ICON_HAPPINESS_1] luxury resources for recurring [ICON_GOLD] Gold, and import what you lack, at floating supply-and-demand prices. The wonder's owner earns +25% on its own sales plus a cut of all trade volume.[NEWLINE][NEWLINE][COLOR_POSITIVE_TEXT]Sovereign Bonds:[ENDCOLOR] Unlocks the [COLOR_POSITIVE_TEXT]Sovereign Bonds[ENDCOLOR] market, where you buy the bonds of other civilizations you have met for a [ICON_GOLD] Gold coupon every turn. Distressed nations pay higher yields and trade at a discount, but can restructure or default."/>
+      <Where Tag="TXT_KEY_TECH_ECONOMICS_HELP"/>
+    </Update>
+  </Language_en_US>
+
+</GameData>

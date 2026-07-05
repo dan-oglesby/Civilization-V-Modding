@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Context>
+
+    <!-- Economy Overview dashboard — read-only aggregate of every Economy Overhaul
+         subsystem. Opens from the Additional Information dropdown (top-right). -->
+    <Grid ID="DashboardPanel"
+          Size="470,500"
+          Anchor="C,C"
+          Style="Grid9DetailFive140"
+          ConsumeMouse="1">
+
+        <Label String="ECONOMY OVERVIEW"
+               Anchor="C,T" Offset="0,12" Font="TwCenMT18"
+               Color0="30.50.80.255" Color1="133.184.186.255" Color2="133.184.186.255"
+               FontStyle="SoftShadow"/>
+
+        <Button ID="ClosePanelBtn" Size="32,32" Anchor="R,T" Offset="-4,4">
+            <Label String="X" Font="TwCenMT16" Anchor="C,C" ColorSet="Beige_Black_Alpha"/>
+            <ShowOnMouseOver>
+                <AlphaAnim Anchor="C,C" Size="32,32" Pause="0" Cycle="Bounce" Speed="1" AlphaStart="2" AlphaEnd="1">
+                    <Grid Size="32,32" Offset="0,0" Style="Grid9FrameTurnsHL"/>
+                </AlphaAnim>
+            </ShowOnMouseOver>
+        </Button>
+
+        <Image Anchor="C,T" Offset="0,42" Texture="HorizontalTrim.dds" Size="450,5"/>
+
+        <ScrollPanel ID="DashScroll" Anchor="L,T" Offset="10,50" Size="452,440" Vertical="1" AutoScrollBar="1">
+            <Stack ID="DashStack" Anchor="L,T" Size="436,0" StackGrowth="Bottom" Offset="0,0" Padding="4">
+
+                <Label String="TREASURY &amp; INCOME" Size="432,22" Font="TwCenMT16"
+                       Color0="30.50.80.255" Color1="133.184.186.255" Color2="133.184.186.255"/>
+                <Label ID="TreasuryLabel"        Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label ID="IncomeLabel"          Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label ID="IncomeBreakdownLabel" Size="432,36" WrapWidth="430" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+
+                <Label String="BANKING" Size="432,22" Font="TwCenMT16"
+                       Color0="30.50.80.255" Color1="133.184.186.255" Color2="133.184.186.255"/>
+                <Label ID="RatesLabel" Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label ID="DebtLabel"  Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+
+                <Label String="MARKETS" Size="432,22" Font="TwCenMT16"
+                       Color0="30.50.80.255" Color1="133.184.186.255" Color2="133.184.186.255"/>
+                <Label ID="StockLabel"     Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label ID="BondLabel"      Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label ID="IndexPoolLabel" Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label ID="TaxLabel"       Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+
+                <Label String="ECONOMIC STANDING" Size="432,22" Font="TwCenMT16"
+                       Color0="30.50.80.255" Color1="133.184.186.255" Color2="133.184.186.255"/>
+                <Label ID="NetWorthLabel" Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label ID="RankLabel"     Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label ID="CycleLabel"    Size="432,20" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+
+            </Stack>
+        </ScrollPanel>
+
+    </Grid>
+
+</Context>

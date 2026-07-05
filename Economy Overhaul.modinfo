@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Mod id="a1b2c3d4-e5f6-7890-abcd-ef1234567900" version="2">
+  <Properties>
+    <Name>Economy Overhaul</Name>
+    <Stability>Beta</Stability>
+    <Teaser>A complete economic layer: banking, markets, taxes, bonds, and the business cycle.</Teaser>
+    <Description>A complete economic layer for Brave New World — seven interlocking systems that share one living economy. All panels open from the Additional Information menu (top-right).
+
+- Banking: your treasury earns floating interest (0.5–6%/turn); take national loans that accrue interest and auto-repay, with a debt-burden unhappiness when debt outruns your income. Build the Bond Exchange national wonder (+0.5%). National Treasury panel.
+- Commodity Market: export strategic and luxury resources for RECURRING per-turn gold at supply/demand-driven prices. Set how many units of each to sell (increments of 1); sold units are committed (tied up) until you stop. An empire ALWAYS keeps 1 of each resource, so it never sells away a luxury's happiness or its ability to build advanced units — only the excess is sold. Build the Commodity Exchange (+25%); optional Sell-All-Surplus toggle.
+- Financial Markets: a stock market of six industry sectors with per-turn dividends, reinvestment, and AI traders. Buy/sell one share at a time.
+- Taxation: a national tax-rate lever (gold now, unhappiness later), unlocked by Currency.
+- Business Cycle: a global boom/bust climate that raises and lowers interest rates, commodity demand, stock values, and tax takes together.
+- Sovereign Bonds: buy and sell other civilizations' debt for coupon income, with discounts, yields, and default risk tied to each nation's finances.
+- Net Worth: an Economic Standing scoreboard ranking the civilizations you have met by total wealth (gold + stocks + bonds − debt).
+
+Unlocked progressively by the Currency and Banking technologies. Single-player. (This is the unified build of the former separate Economy Overhaul modules.)</Description>
+    <Authors>Economy Overhaul Mod</Authors>
+    <AffectsSavedGames>1</AffectsSavedGames>
+    <SupportsSinglePlayer>1</SupportsSinglePlayer>
+    <SupportsMultiplayer>0</SupportsMultiplayer>
+    <SupportsHotSeat>0</SupportsHotSeat>
+    <SupportsMac>0</SupportsMac>
+  </Properties>
+  <Dependencies>
+    <Dlc id="6DA07636-4123-4018-B643-6575B4EC336B" minversion="0" maxversion="999" />
+  </Dependencies>
+  <Files>
+    <File md5="" import="1">Lua/EcoCurrency.lua</File>
+    <File md5="" import="1">Lua/Banking.lua</File>
+    <File md5="" import="1">Lua/CommodityMarket.lua</File>
+    <File md5="" import="1">Lua/StockMarket.lua</File>
+    <File md5="" import="1">Lua/Taxation.lua</File>
+    <File md5="" import="1">Lua/BusinessCycle.lua</File>
+    <File md5="" import="1">Lua/SovereignBonds.lua</File>
+    <File md5="" import="1">Lua/NetWorth.lua</File>
+    <File md5="" import="1">UI/InGame/TopPanel.lua</File>
+    <File md5="" import="1">UI/InGame/BankingPanel.lua</File>
+    <File md5="" import="1">UI/InGame/BankingPanel.xml</File>
+    <File md5="" import="1">UI/InGame/CommodityMarketPanel.lua</File>
+    <File md5="" import="1">UI/InGame/CommodityMarketPanel.xml</File>
+    <File md5="" import="1">UI/InGame/FinancialMarketsPanel.lua</File>
+    <File md5="" import="1">UI/InGame/FinancialMarketsPanel.xml</File>
+    <File md5="" import="1">UI/InGame/TaxationPanel.lua</File>
+    <File md5="" import="1">UI/InGame/TaxationPanel.xml</File>
+    <File md5="" import="1">UI/InGame/BusinessCyclePanel.lua</File>
+    <File md5="" import="1">UI/InGame/BusinessCyclePanel.xml</File>
+    <File md5="" import="1">UI/InGame/SovereignBondsPanel.lua</File>
+    <File md5="" import="1">UI/InGame/SovereignBondsPanel.xml</File>
+    <File md5="" import="1">UI/InGame/NetWorthPanel.lua</File>
+    <File md5="" import="1">UI/InGame/NetWorthPanel.xml</File>
+    <File md5="" import="1">UI/InGame/EconomyDashboardPanel.lua</File>
+    <File md5="" import="1">UI/InGame/EconomyDashboardPanel.xml</File>
+    <File md5="" import="0">XML/Buildings/BondExchange.xml</File>
+    <File md5="" import="0">XML/Buildings/CommodityExchange.xml</File>
+    <File md5="" import="0">XML/Buildings/GlobalStockMarket.xml</File>
+    <File md5="" import="0">XML/Victory/EconomicVictory.xml</File>
+  </Files>
+  <Actions>
+    <OnModActivated>
+      <UpdateDatabase>XML/Buildings/BondExchange.xml</UpdateDatabase>
+      <UpdateDatabase>XML/Buildings/CommodityExchange.xml</UpdateDatabase>
+      <UpdateDatabase>XML/Buildings/GlobalStockMarket.xml</UpdateDatabase>
+      <UpdateDatabase>XML/Victory/EconomicVictory.xml</UpdateDatabase>
+    </OnModActivated>
+  </Actions>
+  <EntryPoints>
+    <EntryPoint type="InGameUIAddin" file="Lua/Banking.lua">
+      <Name>Economy Overhaul - Banking Logic</Name>
+      <Description>Floating interest rates, treasury interest, sovereign debt, debt-burden unhappiness, AI borrow/repay.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="Lua/CommodityMarket.lua">
+      <Name>Economy Overhaul - Commodity Market Logic</Name>
+      <Description>Dynamic commodity pricing, AI selling, auto-sell.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="Lua/StockMarket.lua">
+      <Name>Economy Overhaul - Stock Market Logic</Name>
+      <Description>Industry stock prices, dividend distribution, AI buy/sell.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="Lua/Taxation.lua">
+      <Name>Economy Overhaul - Taxation Logic</Name>
+      <Description>National tax rate: per-turn revenue, unhappiness cost, AI rate selection.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="Lua/BusinessCycle.lua">
+      <Name>Economy Overhaul - Business Cycle Logic</Name>
+      <Description>Global economic climate: boom/bust drift, shocks, per-civ gold effect.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="Lua/SovereignBonds.lua">
+      <Name>Economy Overhaul - Sovereign Bonds Logic</Name>
+      <Description>Per-civ bond yields/prices, coupon payments, defaults and haircuts.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="Lua/NetWorth.lua">
+      <Name>Economy Overhaul - Net Worth Logic</Name>
+      <Description>Per-civ net worth tracking and economic-dominance milestone.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="UI/InGame/BankingPanel.lua">
+      <Name>Economy Overhaul - National Treasury Panel</Name>
+      <Description>Take national loans; view debt status and burden.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="UI/InGame/CommodityMarketPanel.lua">
+      <Name>Economy Overhaul - Commodity Market Panel</Name>
+      <Description>Live resource prices, trends, Sell buttons, and auto-sell toggle.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="UI/InGame/FinancialMarketsPanel.lua">
+      <Name>Economy Overhaul - Stock Market Panel</Name>
+      <Description>Six industry sectors, buy/sell, dividend reinvest toggle.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="UI/InGame/TaxationPanel.lua">
+      <Name>Economy Overhaul - Fiscal Policy Panel</Name>
+      <Description>Set the tax rate; preview revenue and happiness cost.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="UI/InGame/BusinessCyclePanel.lua">
+      <Name>Economy Overhaul - Economic Climate Panel</Name>
+      <Description>Read-only panel showing the current economic phase and its effect.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="UI/InGame/SovereignBondsPanel.lua">
+      <Name>Economy Overhaul - Sovereign Bonds Panel</Name>
+      <Description>Buy/sell foreign bonds; view yields, prices, and default risk.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="UI/InGame/NetWorthPanel.lua">
+      <Name>Economy Overhaul - Economic Standing Panel</Name>
+      <Description>Ranked net-worth scoreboard with a personal breakdown.</Description>
+    </EntryPoint>
+    <EntryPoint type="InGameUIAddin" file="UI/InGame/EconomyDashboardPanel.lua">
+      <Name>Economy Overhaul - Economy Overview Dashboard</Name>
+      <Description>Read-only at-a-glance summary of every economic subsystem.</Description>
+    </EntryPoint>
+  </EntryPoints>
+</Mod>

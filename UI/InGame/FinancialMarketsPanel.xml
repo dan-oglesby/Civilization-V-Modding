@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Context>
+
+    <!-- Stock Market panel — Lord Mayors show/hide pattern.
+         (Sovereign debt / loans live in the Banking mod's panel.) -->
+    <Grid ID="FinancialPanel"
+          Size="620,420"
+          Anchor="C,C"
+          Style="Grid9DetailFive140"
+          ConsumeMouse="1">
+
+        <Label String="STOCK MARKET"
+               Anchor="C,T" Offset="0,10" Font="TwCenMT18"
+               Color0="30.50.80.255" Color1="133.184.186.255" Color2="133.184.186.255"
+               FontStyle="SoftShadow"/>
+
+        <Button ID="ClosePanelBtn" Size="32,32" Anchor="R,T" Offset="-4,4">
+            <Label String="X" Font="TwCenMT16" Anchor="C,C" ColorSet="Beige_Black_Alpha"/>
+            <ShowOnMouseOver>
+                <AlphaAnim Anchor="C,C" Size="32,32" Pause="0" Cycle="Bounce" Speed="1" AlphaStart="2" AlphaEnd="1">
+                    <Grid Size="32,32" Offset="0,0" Style="Grid9FrameTurnsHL"/>
+                </AlphaAnim>
+            </ShowOnMouseOver>
+        </Button>
+
+        <Image Anchor="C,T" Offset="0,40" Texture="HorizontalTrim.dds" Size="600,5"/>
+
+        <Box ID="StocksContent" Anchor="L,T" Size="600,360" Offset="10,48" Color="0.0.0.0">
+            <Label ID="PortfolioSummary" Size="580,20" Offset="4,2" Font="TwCenMT14" ColorSet="Beige_Black_Alpha" TruncateWidth="572" String=""/>
+            <Button ID="ReinvestToggleBtn" Size="260,28" Offset="0,26" Anchor="L,T"
+                    ToolTip="When ON, dividends auto-buy more shares. Fractional amounts pool until enough for a full share.">
+                <Label ID="ReinvestBtnLabel" String="Reinvest Dividends: OFF" Offset="0,0" Font="TwCenMT14" ColorSet="Beige_Black"/>
+                <ShowOnMouseOver>
+                    <AlphaAnim Anchor="C,C" Size="260,28" Pause="0" Cycle="Bounce" Speed="1" AlphaStart="2" AlphaEnd="1">
+                        <Grid Size="260,28" Offset="0,0" Padding="0,0" Style="Grid9FrameTurnsHL"/>
+                    </AlphaAnim>
+                </ShowOnMouseOver>
+            </Button>
+            <Button ID="BuyIndexBtn" Size="322,28" Offset="268,26" Anchor="L,T"
+                    ToolTip="Buy an equal number of shares of every sector at once (up to 100 each), keeping your holdings balanced.">
+                <Label ID="BuyIndexBtnLabel" String="Buy Index Fund" Offset="0,0" Font="TwCenMT14" ColorSet="Beige_Black"/>
+                <ShowOnMouseOver>
+                    <AlphaAnim Anchor="C,C" Size="322,28" Pause="0" Cycle="Bounce" Speed="1" AlphaStart="2" AlphaEnd="1">
+                        <Grid Size="322,28" Offset="0,0" Padding="0,0" Style="Grid9FrameTurnsHL"/>
+                    </AlphaAnim>
+                </ShowOnMouseOver>
+            </Button>
+            <Button ID="AutoInvestToggleBtn" Size="380,28" Offset="0,56" Anchor="L,T"
+                    ToolTip="When ON, your wonder income (Global Stock Market fees and/or Bond Exchange interest) is automatically invested into the stock index instead of paid out as gold.">
+                <Label ID="AutoInvestToggleLabel" String="Auto-Invest Wonder Income: ON" Offset="0,0" Font="TwCenMT14" ColorSet="Beige_Black"/>
+                <ShowOnMouseOver>
+                    <AlphaAnim Anchor="C,C" Size="380,28" Pause="0" Cycle="Bounce" Speed="1" AlphaStart="2" AlphaEnd="1">
+                        <Grid Size="380,28" Offset="0,0" Padding="0,0" Style="Grid9FrameTurnsHL"/>
+                    </AlphaAnim>
+                </ShowOnMouseOver>
+            </Button>
+            <Box Anchor="L,T" Size="580,22" Offset="0,86" Color="0.0.0.128">
+                <Label String="Industry"  Offset="8,2"   Size="156,18" Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label String="Price"     Offset="170,2" Size="72,18"  Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label String="Owned"     Offset="248,2" Size="58,18"  Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label String="Float"     Offset="310,2" Size="58,18"  Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label String="Div/turn"  Offset="372,2" Size="70,18"  Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label String="Buy"       Offset="446,2" Size="58,18"  Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+                <Label String="Sell"      Offset="508,2" Size="58,18"  Font="TwCenMT14" ColorSet="Beige_Black_Alpha"/>
+            </Box>
+            <ScrollPanel ID="StockRowScroll" Size="600,242" Offset="0,110" Vertical="1" AutoScrollBar="1">
+                <Stack ID="StockRowStack" Anchor="L,T" Size="580,0" StackGrowth="Bottom" Offset="0,0" Padding="5"/>
+            </ScrollPanel>
+        </Box>
+
+    </Grid>
+
+    <Instance Name="StockRowInstance">
+        <Box ID="RowRoot" Size="580,34" Color="0.0.0.45">
+            <Label ID="IndName"  Size="156,30" Offset="8,2"   Font="TwCenMT14" ColorSet="Beige_Black_Alpha" TruncateWidth="156"/>
+            <Label ID="IndPrice" Size="72,30"  Offset="170,2" Font="TwCenMT14" ColorSet="Beige_Black_Alpha" TruncateWidth="72"/>
+            <Label ID="IndOwned" Size="58,30"  Offset="248,2" Font="TwCenMT14" ColorSet="Beige_Black_Alpha" TruncateWidth="58"/>
+            <Label ID="IndFloat" Size="58,30"  Offset="310,2" Font="TwCenMT14" ColorSet="Beige_Black_Alpha" TruncateWidth="58"/>
+            <Label ID="IndDiv"   Size="70,30"  Offset="372,2" Font="TwCenMT14" ColorSet="Beige_Black_Alpha" TruncateWidth="70"/>
+            <Button ID="BuyBtn"  Size="58,28"  Offset="446,3">
+                <Label String="Buy" Anchor="C,C" Font="TwCenMT14" ColorSet="Beige_Black"/>
+                <ShowOnMouseOver>
+                    <AlphaAnim Anchor="C,C" Size="58,28" Pause="0" Cycle="Bounce" Speed="1" AlphaStart="2" AlphaEnd="1">
+                        <Grid Size="58,28" Style="Grid9FrameTurnsHL"/>
+                    </AlphaAnim>
+                </ShowOnMouseOver>
+            </Button>
+            <Button ID="SellBtn" Size="58,28"  Offset="508,3">
+                <Label String="Sell" Anchor="C,C" Font="TwCenMT14" ColorSet="Beige_Black"/>
+                <ShowOnMouseOver>
+                    <AlphaAnim Anchor="C,C" Size="58,28" Pause="0" Cycle="Bounce" Speed="1" AlphaStart="2" AlphaEnd="1">
+                        <Grid Size="58,28" Style="Grid9FrameTurnsHL"/>
+                    </AlphaAnim>
+                </ShowOnMouseOver>
+            </Button>
+        </Box>
+    </Instance>
+
+</Context>

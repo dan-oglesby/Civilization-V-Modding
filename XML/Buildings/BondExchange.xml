@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Bond Exchange: national wonder, available after Banking.
+  One per civilization. Handled in Lua (Banking.lua):
+  owning a Bond Exchange earns the civ an extra 0.5% savings rate
+  on top of the floating global rate.
+-->
+<GameData>
+
+  <BuildingClasses>
+    <Row>
+      <Type>BUILDINGCLASS_BOND_EXCHANGE</Type>
+      <DefaultBuilding>BUILDING_BOND_EXCHANGE</DefaultBuilding>
+      <Description>TXT_KEY_BUILDING_BOND_EXCHANGE</Description>
+      <MaxPlayerInstances>1</MaxPlayerInstances>
+    </Row>
+  </BuildingClasses>
+
+  <Buildings>
+    <Row>
+      <Type>BUILDING_BOND_EXCHANGE</Type>
+      <BuildingClass>BUILDINGCLASS_BOND_EXCHANGE</BuildingClass>
+      <Cost>200</Cost>
+      <GoldMaintenance>2</GoldMaintenance>
+      <PrereqTech>TECH_BANKING</PrereqTech>
+      <Help>TXT_KEY_BUILDING_BOND_EXCHANGE_HELP</Help>
+      <Description>TXT_KEY_BUILDING_BOND_EXCHANGE</Description>
+      <Civilopedia>TXT_KEY_BUILDING_BOND_EXCHANGE_PEDIA</Civilopedia>
+      <Strategy>TXT_KEY_BUILDING_BOND_EXCHANGE_STRATEGY</Strategy>
+      <ArtDefineTag>ART_DEF_BUILDING_BANK</ArtDefineTag>
+      <NukeImmune>true</NukeImmune>
+      <NumCityCostMod>30</NumCityCostMod>
+      <HurryCostModifier>-1</HurryCostModifier>
+      <MinAreaSize>-1</MinAreaSize>
+      <NeverCapture>true</NeverCapture>
+      <IconAtlas>BW_ATLAS_1</IconAtlas>
+      <PortraitIndex>18</PortraitIndex>
+    </Row>
+  </Buildings>
+
+  <Language_en_US>
+    <Row Tag="TXT_KEY_BUILDING_BOND_EXCHANGE">
+      <Text>Bond Exchange</Text>
+    </Row>
+    <Row Tag="TXT_KEY_BUILDING_BOND_EXCHANGE_HELP">
+      <Text>National wonder. Your civilization earns [COLOR_POSITIVE_TEXT]+0.5%[ENDCOLOR] treasury interest per turn above the global floating rate. The global rate rises when more civilizations borrow (rewarding your savings more) and falls when capital is plentiful. Only one Bond Exchange may exist per civilization.</Text>
+    </Row>
+    <Row Tag="TXT_KEY_BUILDING_BOND_EXCHANGE_PEDIA">
+      <Text>A Bond Exchange is an institution through which a government issues and trades sovereign debt, formalizing borrowing into a marketplace that sets interest rates through supply and demand. Historically, the Dutch Republic's perpetual annuities and the later development of Treasury markets transformed government finance, allowing nations to fund wars and infrastructure at predictable rates while giving investors a reliable return.</Text>
+    </Row>
+    <Row Tag="TXT_KEY_BUILDING_BOND_EXCHANGE_STRATEGY">
+      <Text>Build the Bond Exchange in your wealthiest city to maximize the 0.5% savings bonus. It is most valuable when global rates are already high — meaning many other civilizations are borrowing heavily. In a high-borrow world, your compounding treasury interest can become a significant gold source.</Text>
+    </Row>
+    <Update>
+      <Set Text="Allows you to build the [COLOR_POSITIVE_TEXT]Bank[ENDCOLOR], a building which increases the [ICON_GOLD] Gold produced by a city, as well as the [COLOR_POSITIVE_TEXT]Constabulary[ENDCOLOR], which hinders a spy's ability to steal your technology.[NEWLINE][NEWLINE][COLOR_POSITIVE_TEXT]Treasury Interest:[ENDCOLOR] Your gold balance earns interest automatically each turn. The rate floats between [COLOR_POSITIVE_TEXT]0.5%[ENDCOLOR] and [COLOR_POSITIVE_TEXT]6%[ENDCOLOR] depending on global borrowing - more borrowers means higher rates, rewarding savers. Build a [COLOR_POSITIVE_TEXT]Bond Exchange[ENDCOLOR] national wonder (also requires Banking) for an extra [COLOR_POSITIVE_TEXT]0.5%[ENDCOLOR] on top.[NEWLINE][NEWLINE][COLOR_POSITIVE_TEXT]Financial Markets:[ENDCOLOR] Once any civilization builds the [COLOR_POSITIVE_TEXT]Global Stock Market[ENDCOLOR] world wonder, the [COLOR_POSITIVE_TEXT]Financial Markets[ENDCOLOR] stock market opens for everyone (from the [COLOR_POSITIVE_TEXT]Additional Information[ENDCOLOR] menu), where you buy and sell shares in six industry sectors for recurring [ICON_GOLD] Gold dividends each turn. Share prices rise and fall with the business cycle.[NEWLINE][NEWLINE][COLOR_WARNING_TEXT]National Loans and Debt Burden:[ENDCOLOR] Borrow [ICON_GOLD] Gold from the [COLOR_POSITIVE_TEXT]National Treasury[ENDCOLOR] panel, opened from the [COLOR_POSITIVE_TEXT]Additional Information[ENDCOLOR] menu at the top-right of the screen. The debt rate floats [COLOR_WARNING_TEXT]3%[ENDCOLOR] above the savings rate, and your treasury auto-repays each turn. Max debt: [COLOR_WARNING_TEXT]2,000 [ICON_GOLD][ENDCOLOR]. When debt exceeds your gross gold income, it causes [COLOR_WARNING_TEXT]unhappiness[ENDCOLOR] - the penalty accelerates steeply the deeper you borrow relative to income. At extreme debt levels this becomes a serious headwind to expansion and development."/>
+      <Where Tag="TXT_KEY_TECH_BANKING_HELP"/>
+    </Update>
+  </Language_en_US>
+
+</GameData>

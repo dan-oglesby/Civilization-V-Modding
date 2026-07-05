@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Economic Victory: a custom victory type for Economy Overhaul. The engine has no
+  built-in detection for it — NetWorth.lua awards it via Game.SetWinner once a civ
+  sustains overwhelming economic dominance (net worth) for the required turns.
+  Text is embedded in this same GameData file so the localization loads reliably
+  (re-inserting an existing TXT_KEY would roll back the whole file, so all keys here
+  are new TXT_KEY_VICTORY_ECO_OVERHAUL_* tags).
+-->
+<GameData>
+
+  <Victories>
+    <Row>
+      <Type>VICTORY_ECONOMIC</Type>
+      <Description>TXT_KEY_VICTORY_ECO_OVERHAUL</Description>
+      <VictoryStatement>TXT_KEY_VICTORY_ECO_OVERHAUL_BANG</VictoryStatement>
+      <VictoryBackground>Victory_Score.dds</VictoryBackground>
+      <Civilopedia>TXT_KEY_VICTORY_ECO_OVERHAUL_PEDIA</Civilopedia>
+      <WinsGame>true</WinsGame>
+      <Audio>AS2D_VICTORY_SPEECH_DIPLOMATIC_VICTORY</Audio>
+    </Row>
+  </Victories>
+
+  <Language_en_US>
+    <Row Tag="TXT_KEY_VICTORY_ECO_OVERHAUL">
+      <Text>Economic Victory</Text>
+    </Row>
+    <Row Tag="TXT_KEY_VICTORY_ECO_OVERHAUL_BANG">
+      <Text>Economic Supremacy!</Text>
+    </Row>
+    <Row Tag="TXT_KEY_VICTORY_ECO_OVERHAUL_PEDIA">
+      <Text>An Economic Victory is won through sheer financial supremacy. A civilization that amasses the world's largest net worth -- gold, stocks, and bonds, less debt -- by a commanding margin, and sustains that dominance long enough, bends global commerce to its will and wins the game.</Text>
+    </Row>
+  </Language_en_US>
+
+</GameData>
