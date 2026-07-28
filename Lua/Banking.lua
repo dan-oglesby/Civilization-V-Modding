@@ -375,8 +375,6 @@ function OnActivePlayerTurnStart()
     local savingsRate = MapModData.EcoOverhaul_SavingsRate
     local debtRate    = MapModData.EcoOverhaul_DebtRate
     local prevRate    = MapModData.EcoOverhaul_PrevSavingsRate
-    local iDebt       = GetDebt(iPlayer)
-    local iSpace      = MAX_DEBT - iDebt
     local iCurrentTurn= Game.GetGameTurn()
 
     -- Loan offers are now handled in the National Treasury panel.

@@ -431,6 +431,11 @@ local function AIStockDecisions(iPlayer)
                     SetFloat(ind.key, float - buyQty)
                     iGoldCopper = iGoldCopper - cost
                     totalOwned  = totalOwned + buyQty
+                    -- Keep the locals in step with the stored values: the sell branch below
+                    -- reads them, and a stale `owned` would write back a share count that
+                    -- silently erases this purchase.
+                    owned = owned + buyQty
+                    float = float - buyQty
                 end
             end
         end
@@ -448,6 +453,8 @@ local function AIStockDecisions(iPlayer)
             SetFloat(ind.key, float + sellQty)
             iGoldCopper = iGoldCopper + revenue
             totalOwned  = totalOwned - sellQty
+            owned = owned - sellQty
+            float = float + sellQty
         end
     end
 end

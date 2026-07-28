@@ -136,7 +136,9 @@ local function ComputeAllPrices()
         local iRes  = resource.ID
         local uType = Game.GetResourceUsageType(iRes)
 
-        if IsTradeableResource(uType) then
+        -- IsExempt must match ReconcileExports: Corporations-mod equity shares are never
+        -- tradeable, so they must not be priced or counted in supply/demand either.
+        if IsTradeableResource(uType) and not IsExempt(resource) then
             local totalAvail, totalCommitted, civsWanting = 0, 0, 0
             local marketExports = 0   -- units offered for sale (positive committed) = importable supply
             local importDemand  = 0   -- units actively being imported (negative committed) = live buy orders

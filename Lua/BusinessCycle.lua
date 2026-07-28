@@ -73,6 +73,11 @@ end
 -- ============================================================
 
 local function TriggerMarketCrash()
+    -- Gate on the market actually being OPEN (the Global Stock Market world wonder exists).
+    -- The price table itself is initialised to defaults when StockMarket.lua loads, so it is
+    -- never nil and cannot serve as the gate — without this check a "Stock Market Crash"
+    -- could fire in the Ancient era, before any exchange had been founded.
+    if (MapModData.EcoOverhaul_StockExchangeOwner or -1) < 0 then return false end
     local prices = MapModData.EcoOverhaul_StockPrices
     if prices == nil then return false end   -- stock market not open yet
     local factor = (CRASH_FACTOR_MIN + Game.Rand(21, "EcoCrashFactor")) / 100   -- 0.45..0.65
