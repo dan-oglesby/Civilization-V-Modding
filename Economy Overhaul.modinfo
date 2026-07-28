@@ -54,14 +54,16 @@ Unlocked progressively by the Currency and Banking technologies. Single-player. 
     <File md5="" import="0">XML/Buildings/BondExchange.xml</File>
     <File md5="" import="0">XML/Buildings/CommodityExchange.xml</File>
     <File md5="" import="0">XML/Buildings/GlobalStockMarket.xml</File>
-    <File md5="" import="0">XML/Victory/EconomicVictory.xml</File>
+    <!-- DIAGNOSTIC 2026-07-06: custom victory disabled to test activation crash. Re-add to restore. -->
+    <!-- <File md5="" import="0">XML/Victory/EconomicVictory.xml</File> -->
   </Files>
   <Actions>
     <OnModActivated>
       <UpdateDatabase>XML/Buildings/BondExchange.xml</UpdateDatabase>
       <UpdateDatabase>XML/Buildings/CommodityExchange.xml</UpdateDatabase>
       <UpdateDatabase>XML/Buildings/GlobalStockMarket.xml</UpdateDatabase>
-      <UpdateDatabase>XML/Victory/EconomicVictory.xml</UpdateDatabase>
+      <!-- DIAGNOSTIC 2026-07-06: custom victory disabled to test activation crash. Re-add to restore. -->
+      <!-- <UpdateDatabase>XML/Victory/EconomicVictory.xml</UpdateDatabase> -->
     </OnModActivated>
   </Actions>
   <EntryPoints>
