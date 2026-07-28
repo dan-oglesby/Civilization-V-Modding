@@ -7,9 +7,8 @@
 -- and can default — and if the issuer is wiped off the map, their
 -- bonds become worthless.
 --
--- Self-contained: it derives each civ's creditworthiness on its own.
--- If the Banking mod is present, it uses that mod's per-civ debt as a
--- richer creditworthiness signal.
+-- Self-contained: it derives each civ's creditworthiness on its own,
+-- from deficit spending and the size of its reserves relative to income.
 --
 -- A civ's bonds become available to trade once you have met them.
 -- Buying/selling is done from the Sovereign Bonds panel; this file
@@ -29,7 +28,6 @@ local BASE_YIELD     = 0.03     -- coupon yield floor (per turn)
 local RISK_SPREAD    = 0.06     -- extra yield at maximum distress
 local PRICE_MIN      = 35
 local PRICE_MAX      = 130
-local DEBT_RATIO_FULL = 8.0     -- debt = 8x income counts as maximum distress
 local HAIRCUT_DISTRESS = 0.85   -- above this, a default (haircut) can occur
 local HAIRCUT_CHANCE = 8        -- % chance per turn of a haircut when very distressed
 local HAIRCUT_FRACTION = 0.30   -- fraction of units wiped in a haircut
@@ -69,19 +67,28 @@ local function SetHoldings(iHolder, iIssuer, units)
     MapModData.EcoOverhaul_BondHoldings[iHolder] = MapModData.EcoOverhaul_BondHoldings[iHolder]
 end
 
--- Distress in [0,1]. Uses Banking's per-civ debt when present, else a
--- proxy from gold-per-turn and treasury size.
+-- Distress in [0,1]. Sovereign debt was removed from the mod, so creditworthiness is
+-- read straight off each civ's fiscal health instead:
+--   * a negative gold-per-turn is the strongest signal (it is running a deficit),
+--   * a thin treasury relative to its own income means little room to absorb a shock.
+-- Both are debt-free measures, so bonds still price distressed nations differently.
 local function ComputeDistress(pIssuer, iIssuer)
-    local bankingDebt = MapModData.EcoOverhaul_Debt and MapModData.EcoOverhaul_Debt[iIssuer]
-    if bankingDebt ~= nil and bankingDebt > 0 then
-        local ratio = bankingDebt / GetGrossGoldIncome(pIssuer)
-        return math.max(0, math.min(1, ratio / DEBT_RATIO_FULL))
-    end
-    -- Standalone proxy
     local distress = 0
-    local gpt = pIssuer:CalculateGoldRate()
-    if gpt < 0 then distress = distress + math.min(0.5, (-gpt) / 40) end
-    if pIssuer:GetGold() < 100 then distress = distress + 0.2 end
+
+    -- Deficit: scaled against the civ's own income, so a small empire bleeding 10g/turn
+    -- reads as distressed while a large one shrugs the same number off.
+    local income = GetGrossGoldIncome(pIssuer)
+    local gpt    = pIssuer:CalculateGoldRate()
+    if gpt < 0 then
+        distress = distress + math.min(0.6, (-gpt) / math.max(1, income))
+    end
+
+    -- Reserves: less than ~5 turns of income in the bank is a thin cushion.
+    local reserveTurns = pIssuer:GetGold() / math.max(1, income)
+    if reserveTurns < 5 then
+        distress = distress + 0.4 * (1 - reserveTurns / 5)
+    end
+
     return math.max(0, math.min(1, distress))
 end
 

@@ -5,7 +5,7 @@
 -- Additions: gold display shows treasury in gold/silver/copper plus (+i) interest,
 --            (debt:N), (+sold) commodity, and (+div) stock indicators;
 --            gold tooltip shows bond market rates, interest earned, and debt burden;
---            happiness tooltip shows debt-burden unhappiness.
+--            gold tooltip shows the capital market and treasury interest.
 -------------------------------
 
 include("EcoCurrency");   -- gold/silver/copper money layer: EcoFormatMoney, EcoGetWealthCopper
@@ -78,11 +78,6 @@ function UpdateData()
 			local strGptStr = ((iTotalPerTurnCopper >= 0) and "+" or "") .. EcoFormatMoney(iTotalPerTurnCopper);
 			local strGoldStr = EcoFormatMoney(iWealthCopper) .. " [COLOR:200:200:200:255](" .. strGptStr .. ")[/COLOR]";
 
-			-- Debt stays a separate warning indicator (it's a balance, not per-turn income).
-			local iDebt = (MapModData.EcoOverhaul_Debt ~= nil) and (MapModData.EcoOverhaul_Debt[iPlayerID] or 0) or 0;
-			if iDebt > 0 then
-				strGoldStr = strGoldStr .. " [COLOR:255:100:100:255](debt:" .. EcoFormatGoldShort(iDebt) .. ")[/COLOR]";
-			end
 			Controls.GoldPerTurn:SetText(strGoldStr);
 
 			-----------------------------
@@ -442,63 +437,37 @@ function GoldTipHandler( control )
 	end
 
 	-- -------------------------------------------------------
-	-- Economy Overhaul: Bond Market section
+	-- Economy Overhaul: Capital Market section
 	-- -------------------------------------------------------
 	local iInterest    = (MapModData.EcoOverhaul_InterestEarned   ~= nil) and (MapModData.EcoOverhaul_InterestEarned[iPlayerID]   or 0) or 0;
-	local iDebt        = (MapModData.EcoOverhaul_Debt             ~= nil) and (MapModData.EcoOverhaul_Debt[iPlayerID]             or 0) or 0;
-	local iDebtInt     = (MapModData.EcoOverhaul_DebtInterestOwed ~= nil) and (MapModData.EcoOverhaul_DebtInterestOwed[iPlayerID] or 0) or 0;
 	local savingsRate  = MapModData.EcoOverhaul_SavingsRate  or 0;
-	local debtRate     = MapModData.EcoOverhaul_DebtRate     or 0;
 	local totalSavings = MapModData.EcoOverhaul_TotalSavings or 0;
-	local totalDebt    = MapModData.EcoOverhaul_TotalDebt    or 0;
 	local pHasBanking = (GameInfoTypes["TECH_BANKING"] ~= nil) and Teams[pPlayer:GetTeam()]:GetTeamTechs():HasTech(GameInfoTypes["TECH_BANKING"]);
 	if savingsRate > 0 and pHasBanking then
 		local corpDebt = MapModData.EcoOverhaul_CorpDebt or 0;
-		local borrowed = totalDebt + corpDebt;
-		local totalCapital = totalSavings + borrowed;
-		local debtPct = (totalCapital > 0) and math.floor(borrowed / totalCapital * 100) or 0;
+		local debtPct  = MapModData.EcoOverhaul_BorrowedPct or 0;
 		local rateDir;
-		if debtPct > 60 then rateDir = "[COLOR_WARNING_TEXT]High (lots of borrowing)[ENDCOLOR]";
-		elseif debtPct > 30 then rateDir = "[COLOR:255:220:80:255]Moderate[/COLOR]";
-		else rateDir = "[COLOR_POSITIVE_TEXT]Low (lots of savings)[ENDCOLOR]";
+		if debtPct > 20 then rateDir = "[COLOR_POSITIVE_TEXT]High (heavy borrowing)[ENDCOLOR]";
+		elseif debtPct > 10 then rateDir = "[COLOR:255:220:80:255]Moderate[/COLOR]";
+		else rateDir = "[COLOR:200:200:200:255]Low (capital is plentiful)[/COLOR]";
 		end
-		strText = strText .. "[NEWLINE][NEWLINE][COLOR:200:200:255:255]--- Bond Market ---[/COLOR]";
+		strText = strText .. "[NEWLINE][NEWLINE][COLOR:200:200:255:255]--- Capital Market ---[/COLOR]";
 		strText = strText .. "[NEWLINE][COLOR_POSITIVE_TEXT]  Savings rate: +"
-			.. string.format("%.1f", savingsRate * 100) .. "%/turn[ENDCOLOR]   "
-			.. "[COLOR_WARNING_TEXT]Debt rate: +"
-			.. string.format("%.1f", debtRate * 100) .. "%/turn[ENDCOLOR]";
-		strText = strText .. "[NEWLINE]  Global pressure: " .. rateDir;
+			.. string.format("%.1f", savingsRate * 100) .. "%/turn[ENDCOLOR]";
+		strText = strText .. "[NEWLINE]  Borrowing demand: " .. rateDir;
 		strText = strText .. " (" .. debtPct .. "% of all capital is borrowed)";
+		strText = strText .. "[NEWLINE]  World capital: " .. EcoFormatGold(totalSavings);
 		if corpDebt > 0 then
-			strText = strText .. "[NEWLINE]  [COLOR:200:200:200:255]Incl. corporate borrowing (rises in booms): " .. EcoFormatGold(corpDebt) .. "[/COLOR]";
+			strText = strText .. "[NEWLINE]  [COLOR:200:200:200:255]Corporate borrowing (rises in booms): " .. EcoFormatGold(corpDebt) .. "[/COLOR]";
 		end
 	end
 	if iInterest > 0 then
 		strText = strText .. "[NEWLINE][COLOR_POSITIVE_TEXT]  [ICON_BULLET] Treasury interest earned this turn: +"
 			.. EcoFormatMoney(iInterest) .. "[/COLOR]";
-		strText = strText .. "[NEWLINE]    Your savings grow faster when more civs are borrowing.";
+		strText = strText .. "[NEWLINE]    Your savings grow faster when corporate borrowing is heavy.";
 	end
-	if iDebt > 0 then
-		local iDebtPenalty = (MapModData.EcoOverhaul_DebtUnhappiness ~= nil) and (MapModData.EcoOverhaul_DebtUnhappiness[iPlayerID] or 0) or 0;
-		local fDebtRatio   = (MapModData.EcoOverhaul_DebtRatio ~= nil) and (MapModData.EcoOverhaul_DebtRatio[iPlayerID] or 0) or 0;
-		strText = strText .. "[NEWLINE][COLOR_WARNING_TEXT]  [ICON_BULLET] National debt: " .. EcoFormatGold(iDebt);
-		if iDebtInt > 0 then
-			strText = strText .. " (+" .. EcoFormatGold(iDebtInt) .. " interest this turn)";
-		end
-		strText = strText .. "[/COLOR]";
-		if fDebtRatio > 0 then
-			local ratioStr = string.format("%.1f", fDebtRatio);
-			if iDebtPenalty > 0 then
-				strText = strText .. "[NEWLINE]  [COLOR:255:80:80:255][ICON_BULLET] Debt burden: -" .. iDebtPenalty
-					.. " [ICON_HAPPINESS_4] unhappiness"
-					.. "  (debt/income " .. ratioStr .. "x — penalty begins above 1x)[/COLOR]";
-			else
-				strText = strText .. "[NEWLINE]  [COLOR:200:200:200:255]Debt/income ratio: " .. ratioStr .. "x — unhappiness penalty begins above 1x.[/COLOR]";
-			end
-		end
-		strText = strText .. "[NEWLINE]    Auto-repayment scales with rate — borrow more from the National Treasury panel.";
-	elseif savingsRate > 0 then
-		strText = strText .. "[NEWLINE][COLOR:180:180:180:255]  Loans available — open the National Treasury panel to borrow.[/COLOR]";
+	if savingsRate > 0 then
+		strText = strText .. "[NEWLINE][COLOR:180:180:180:255]  Open the National Treasury panel for the full rate picture.[/COLOR]";
 	end
 	-- -------------------------------------------------------
 
@@ -606,17 +575,6 @@ function HappinessTipHandler( control )
 		if (iPoliciesHappiness < 0) then strText = strText .. "[NEWLINE]  [ICON_BULLET]" .. Locale.ConvertTextKey("TXT_KEY_TP_HAPPINESS_POLICIES", iPoliciesHappiness); end
 		if (iUnhappinessPublicOpinion > 0) then strText = strText .. "[NEWLINE]  [ICON_BULLET]" .. Locale.ConvertTextKey("TXT_KEY_TP_UNHAPPINESS_PUBLIC_OPINION", iUnhappinessPublicOpinion); end
 		strText = strText .. "[/COLOR]";
-
-		-- Economy Overhaul: debt-burden unhappiness
-		local iDebtPenalty = (MapModData.EcoOverhaul_DebtUnhappiness ~= nil) and (MapModData.EcoOverhaul_DebtUnhappiness[iPlayerID] or 0) or 0;
-		local fDebtRatio   = (MapModData.EcoOverhaul_DebtRatio ~= nil) and (MapModData.EcoOverhaul_DebtRatio[iPlayerID] or 0) or 0;
-		if iDebtPenalty > 0 then
-			strText = strText .. "[NEWLINE][NEWLINE][COLOR:255:80:80:255]";
-			strText = strText .. "[ICON_BULLET] National Debt Burden: -" .. iDebtPenalty .. " [ICON_HAPPINESS_4]";
-			strText = strText .. "[NEWLINE]  Debt/income ratio: " .. string.format("%.1f", fDebtRatio) .. "x. High sovereign debt demoralises citizens.";
-			strText = strText .. "[NEWLINE]  Repay debt or grow income to reduce this penalty.";
-			strText = strText .. "[/COLOR]";
-		end
 
 		if (not OptionsManager.IsNoBasicHelp()) then
 			strText = strText .. "[NEWLINE][NEWLINE]";

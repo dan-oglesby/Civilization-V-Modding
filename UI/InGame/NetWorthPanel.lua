@@ -35,19 +35,14 @@ local function BondValue(iPlayer)
     return v
 end
 
-local function DebtValue(iPlayer)
-    return (MapModData.EcoOverhaul_Debt and MapModData.EcoOverhaul_Debt[iPlayer]) or 0
-end
-
--- All five returned in COPPER (mirrors NetWorth.lua) — stock prices are copper.
+-- All four returned in COPPER (mirrors NetWorth.lua) — stock prices are copper.
 local function Components(iPlayer)
     local pPlayer = Players[iPlayer]
-    if pPlayer == nil then return 0, 0, 0, 0, 0 end
+    if pPlayer == nil then return 0, 0, 0, 0 end
     local gold   = EcoGetWealthCopper(pPlayer)                  -- copper (treasury + purse)
     local stocks = StockValue(iPlayer)                          -- copper (prices are copper)
     local bonds  = BondValue(iPlayer) * ECO_COPPER_PER_GOLD     -- bond prices are gold -> copper
-    local debt   = DebtValue(iPlayer) * ECO_COPPER_PER_GOLD     -- debt is gold -> copper
-    return gold, stocks, bonds, debt, (gold + stocks + bonds - debt)
+    return gold, stocks, bonds, (gold + stocks + bonds)
 end
 
 -- ============================================================
@@ -62,11 +57,11 @@ local function RefreshPanel()
     local myTeam = pPlayer:GetTeam()
 
     -- Self breakdown (all values copper -> formatted g/s/c)
-    local gold, stocks, bonds, debt, nw = Components(iPlayer)
+    local gold, stocks, bonds, nw = Components(iPlayer)
     Controls.BreakdownLabel:SetText(
         "Your net worth: [COLOR_POSITIVE_TEXT]" .. EcoFormatMoney(nw) .. "[ENDCOLOR][NEWLINE]"
         .. "Gold " .. EcoFormatMoney(gold) .. "  +  Stocks " .. EcoFormatMoney(stocks)
-        .. "  +  Bonds " .. EcoFormatMoney(bonds) .. "  -  Debt " .. EcoFormatMoney(debt))
+        .. "  +  Bonds " .. EcoFormatMoney(bonds))
 
     -- Collect self + met majors
     local list = {}
@@ -74,7 +69,7 @@ local function RefreshPanel()
         local p = Players[iP]
         if p ~= nil and p:IsAlive() and not p:IsMinorCiv() and not p:IsBarbarian() then
             if iP == iPlayer or Teams[myTeam]:IsHasMet(p:GetTeam()) then
-                local _, _, _, _, pnw = Components(iP)
+                local _, _, _, pnw = Components(iP)
                 table.insert(list, { id = iP, nw = pnw, name = p:GetCivilizationShortDescription() })
             end
         end

@@ -46,6 +46,7 @@ local function RefreshDashboard()
 
     local interest = modPT(MapModData.EcoOverhaul_InterestEarned, iPlayer)
     local commod   = modPT(MapModData.EcoOverhaul_CmdSaleIncome,  iPlayer)
+    -- (no debt line: national loans / sovereign debt were removed from the mod)
     local divs     = modPT(MapModData.EcoOverhaul_StockDivEarned, iPlayer)
     local bondInc  = modPT(MapModData.EcoOverhaul_BondIncome,     iPlayer)
     local tax      = modPT(MapModData.EcoOverhaul_TaxRevenue,     iPlayer)
@@ -58,14 +59,8 @@ local function RefreshDashboard()
 
     -- BANKING
     local sr = MapModData.EcoOverhaul_SavingsRate or 0
-    local dr = MapModData.EcoOverhaul_DebtRate    or 0
-    Controls.RatesLabel:SetText(string.format("Savings rate: [COLOR_POSITIVE_TEXT]%.1f%%[ENDCOLOR]   Debt rate: [COLOR_WARNING_TEXT]%.1f%%[ENDCOLOR]/turn", sr * 100, dr * 100))
-    local debt = (MapModData.EcoOverhaul_Debt or {})[iPlayer] or 0
-    if debt > 0 then
-        Controls.DebtLabel:SetText("Outstanding debt:  [COLOR_WARNING_TEXT]" .. EcoFormatGold(debt) .. "[ENDCOLOR]")
-    else
-        Controls.DebtLabel:SetText("Outstanding debt:  [COLOR:170:170:170:255]none[ENDCOLOR]")
-    end
+    Controls.RatesLabel:SetText(string.format("Savings rate: [COLOR_POSITIVE_TEXT]%.1f%%[ENDCOLOR]/turn   World capital: %s",
+        sr * 100, EcoFormatGold(MapModData.EcoOverhaul_TotalSavings or 0)))
 
     -- MARKETS
     Controls.StockLabel:SetText("Stock portfolio:  " .. EcoFormatMoney(StockPortfolioCopper(iPlayer)))

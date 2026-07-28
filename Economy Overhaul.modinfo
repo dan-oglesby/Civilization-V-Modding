@@ -6,13 +6,13 @@
     <Teaser>A complete economic layer: banking, markets, taxes, bonds, and the business cycle.</Teaser>
     <Description>A complete economic layer for Brave New World — seven interlocking systems that share one living economy. All panels open from the Additional Information menu (top-right).
 
-- Banking: your treasury earns floating interest (0.5–6%/turn); take national loans that accrue interest and auto-repay, with a debt-burden unhappiness when debt outruns your income. Build the Bond Exchange national wonder (+0.5%). National Treasury panel.
+- Banking: your treasury earns floating interest (0.5–6%/turn), set by how heavily the corporate sector is borrowing — which rises in a boom and falls in a downturn. Build the Bond Exchange national wonder (+0.5%). National Treasury panel.
 - Commodity Market: export strategic and luxury resources for RECURRING per-turn gold at supply/demand-driven prices. Set how many units of each to sell (increments of 1); sold units are committed (tied up) until you stop. An empire ALWAYS keeps 1 of each resource, so it never sells away a luxury's happiness or its ability to build advanced units — only the excess is sold. Build the Commodity Exchange (+25%); optional Sell-All-Surplus toggle.
 - Financial Markets: a stock market of six industry sectors with per-turn dividends, reinvestment, and AI traders. Buy/sell one share at a time.
 - Taxation: a national tax-rate lever (gold now, unhappiness later), unlocked by Currency.
 - Business Cycle: a global boom/bust climate that raises and lowers interest rates, commodity demand, stock values, and tax takes together.
 - Sovereign Bonds: buy and sell other civilizations' debt for coupon income, with discounts, yields, and default risk tied to each nation's finances.
-- Net Worth: an Economic Standing scoreboard ranking the civilizations you have met by total wealth (gold + stocks + bonds − debt).
+- Net Worth: an Economic Standing scoreboard ranking the civilizations you have met by total wealth (gold + stocks + bonds).
 
 Unlocked progressively by the Currency and Banking technologies. Single-player. (This is the unified build of the former separate Economy Overhaul modules.)</Description>
     <Authors>Economy Overhaul Mod</Authors>
@@ -67,7 +67,7 @@ Unlocked progressively by the Currency and Banking technologies. Single-player. 
   <EntryPoints>
     <EntryPoint type="InGameUIAddin" file="Lua/Banking.lua">
       <Name>Economy Overhaul - Banking Logic</Name>
-      <Description>Floating interest rates, treasury interest, sovereign debt, debt-burden unhappiness, AI borrow/repay.</Description>
+      <Description>Floating interest rates driven by corporate borrowing demand; treasury interest.</Description>
     </EntryPoint>
     <EntryPoint type="InGameUIAddin" file="Lua/CommodityMarket.lua">
       <Name>Economy Overhaul - Commodity Market Logic</Name>
@@ -95,7 +95,7 @@ Unlocked progressively by the Currency and Banking technologies. Single-player. 
     </EntryPoint>
     <EntryPoint type="InGameUIAddin" file="UI/InGame/BankingPanel.lua">
       <Name>Economy Overhaul - National Treasury Panel</Name>
-      <Description>Take national loans; view debt status and burden.</Description>
+      <Description>View the savings rate, your treasury interest, and the world capital market.</Description>
     </EntryPoint>
     <EntryPoint type="InGameUIAddin" file="UI/InGame/CommodityMarketPanel.lua">
       <Name>Economy Overhaul - Commodity Market Panel</Name>

@@ -123,8 +123,8 @@ RefreshPanel = function()
     end
     if MapModData.EcoOverhaul_SavingsRate ~= nil then
         Controls.RateSummaryLabel:SetText(string.format(
-            "%sRates — Savings: [COLOR_POSITIVE_TEXT]%.1f%%[ENDCOLOR]   Debt: [COLOR_WARNING_TEXT]%.1f%%[ENDCOLOR]/turn",
-            ownerLine, (MapModData.EcoOverhaul_SavingsRate or 0) * 100, (MapModData.EcoOverhaul_DebtRate or 0) * 100))
+            "%sSavings rate: [COLOR_POSITIVE_TEXT]%.1f%%[ENDCOLOR]/turn",
+            ownerLine, (MapModData.EcoOverhaul_SavingsRate or 0) * 100))
     else
         Controls.RateSummaryLabel:SetText(ownerLine .. "Sell surplus [ICON_PRODUCTION] strategic / [ICON_HAPPINESS_1] luxury resources for recurring income, or import what you lack.")
     end

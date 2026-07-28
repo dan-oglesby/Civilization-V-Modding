@@ -2,7 +2,7 @@
 -- Economy Overhaul: NetWorth.lua
 --
 -- Tracks each civilization's total economic standing:
---   net worth = gold + stock portfolio + foreign bonds − debt
+--   net worth = gold + stock portfolio + foreign bonds
 -- Each asset class is read nil-safe from the relevant Economy
 -- Overhaul mod, so net worth is meaningful with this mod alone
 -- (treasury gold) and richer as the others are added.
@@ -66,21 +66,16 @@ local function BondValue(iPlayer)
     return v
 end
 
-local function DebtValue(iPlayer)
-    return (MapModData.EcoOverhaul_Debt and MapModData.EcoOverhaul_Debt[iPlayer]) or 0
-end
-
 -- Exposed so the panel can show a breakdown without recomputing.
--- All five values are returned in COPPER (1 gold = 100 copper) so the
--- gold/stocks/bonds/debt mix is consistent (stock prices are copper).
+-- All four values are returned in COPPER (1 gold = 100 copper) so the
+-- gold/stocks/bonds mix is consistent (stock prices are copper).
 function EcoOverhaul_NetWorthComponents(iPlayer)
     local pPlayer = Players[iPlayer]
-    if pPlayer == nil then return 0, 0, 0, 0, 0 end
+    if pPlayer == nil then return 0, 0, 0, 0 end
     local gold   = EcoGetWealthCopper(pPlayer)                  -- copper (treasury + purse)
     local stocks = StockValue(iPlayer)                          -- copper (prices are copper)
     local bonds  = BondValue(iPlayer) * ECO_COPPER_PER_GOLD     -- bond prices are gold -> copper
-    local debt   = DebtValue(iPlayer) * ECO_COPPER_PER_GOLD     -- debt is gold -> copper
-    return gold, stocks, bonds, debt, (gold + stocks + bonds - debt)
+    return gold, stocks, bonds, (gold + stocks + bonds)
 end
 
 -- ============================================================
@@ -117,7 +112,7 @@ local function ComputeNetWorth()
     for iP = 0, GameDefines.MAX_MAJOR_CIVS - 1 do
         local p = Players[iP]
         if p ~= nil and p:IsAlive() and not p:IsMinorCiv() and not p:IsBarbarian() then
-            local _, _, _, _, nw = EcoOverhaul_NetWorthComponents(iP)
+            local _, _, _, nw = EcoOverhaul_NetWorthComponents(iP)
             MapModData.EcoOverhaul_NetWorth[iP] = nw
             if nw > 0 then total = total + nw end
             if nw > best then
