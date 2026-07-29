@@ -10,6 +10,28 @@
 
 include("EcoCurrency");   -- gold/silver/copper money layer: EcoFormatMoney, EcoGetWealthCopper
 
+-------------------------------
+-- Corporations (BNW) compatibility.
+--
+-- That mod replaces this same file. Only one replacement can win the VFS, so without
+-- this the two mods silently delete each other's top bar. Our modinfo declares a
+-- <Reference> to Corporations so we load last and win deterministically -- and then we
+-- fold its corporate revenue back in here, so nothing of theirs is lost.
+--
+-- Both the include and the call are pcall-guarded: if Corporations is not active the
+-- file simply is not in the VFS, g_bCorpMod stays false, and we add nothing.
+-- Corp_UI.lua pulls in their bootstrap, which is idempotent (guarded by
+-- MapModData.gCorpBootstrapInitted), so including it here is safe either way.
+-------------------------------
+local g_bCorpMod = pcall(function() include("Corp_UI.lua"); end);
+
+local function EcoCorpRevenue(pPlayer)
+	if not g_bCorpMod or pPlayer == nil then return 0; end
+	local ok, v = pcall(function() return GetCorporationRevenue(pPlayer); end);
+	if ok and type(v) == "number" then return v; end
+	return 0;
+end
+
 function UpdateData()
 
 	local iPlayerID = Game.GetActivePlayer();
@@ -46,7 +68,9 @@ function UpdateData()
 					strScienceText = string.format("[COLOR:255:60:60:255]" .. Locale.ConvertTextKey("TXT_KEY_NO_SCIENCE") .. "[/COLOR]");
 				else
 					strScienceText = string.format("+%i", sciencePerTurn);
-					local iGoldPerTurn = pPlayer:CalculateGoldRate();
+					-- Corporations compat: their revenue counts toward whether gold is being
+					-- deducted from science, exactly as their own TopPanel does.
+					local iGoldPerTurn = pPlayer:CalculateGoldRate() + EcoCorpRevenue(pPlayer);
 					if (pPlayer:GetGold() + iGoldPerTurn < 0) then
 						strScienceText = "[COLOR:255:60:0:255]" .. strScienceText .. "[/COLOR]";
 					else
@@ -74,6 +98,9 @@ function UpdateData()
 			-- pool is naturally excluded (its key reads 0), since it buys shares not gold.
 			local function modPT(tbl) return (tbl ~= nil and tbl[iPlayerID]) or 0 end
 			local iModIncome = modPT(MapModData.EcoOverhaul_InterestEarned) + modPT(MapModData.EcoOverhaul_CmdSaleIncome) + modPT(MapModData.EcoOverhaul_StockDivEarned) + modPT(MapModData.EcoOverhaul_BondIncome) + modPT(MapModData.EcoOverhaul_TaxRevenue);
+			-- Corporations compat: their per-turn revenue joins the same combined figure
+			-- (converted to copper), so the displayed rate stays correct with both mods on.
+			iModIncome = iModIncome + EcoCorpRevenue(pPlayer) * ECO_COPPER_PER_GOLD;
 			local iTotalPerTurnCopper = iGoldPerTurn * ECO_COPPER_PER_GOLD + iModIncome;
 			local strGptStr = ((iTotalPerTurnCopper >= 0) and "+" or "") .. EcoFormatMoney(iTotalPerTurnCopper);
 			local strGoldStr = EcoFormatMoney(iWealthCopper) .. " [COLOR:200:200:200:255](" .. strGptStr .. ")[/COLOR]";
@@ -395,7 +422,8 @@ function GoldTipHandler( control )
 	local fGoldPerTurnFromCities = pPlayer:GetGoldFromCitiesMinusTradeRoutesTimes100() / 100;
 	local fCityConnectionGold = pPlayer:GetCityConnectionGoldTimes100() / 100;
 	local fTraitGold = pPlayer:GetGoldPerTurnFromTraits();
-	local fTotalIncome = fGoldPerTurnFromCities + iGoldPerTurnFromOtherPlayers + fCityConnectionGold + iGoldPerTurnFromReligion + fTradeRouteGold + fTraitGold;
+	local fCorpGold = EcoCorpRevenue(pPlayer);   -- Corporations compat (0 when that mod is off)
+	local fTotalIncome = fGoldPerTurnFromCities + iGoldPerTurnFromOtherPlayers + fCityConnectionGold + iGoldPerTurnFromReligion + fTradeRouteGold + fTraitGold + fCorpGold;
 	if (pPlayer:IsAnarchy()) then
 		strText = strText .. Locale.ConvertTextKey("TXT_KEY_TP_ANARCHY", pPlayer:GetAnarchyNumTurns());
 		strText = strText .. "[NEWLINE][NEWLINE]";
@@ -417,6 +445,10 @@ function GoldTipHandler( control )
 	end
 	if (iGoldPerTurnFromReligion > 0) then
 		strText = strText .. "[NEWLINE]  [ICON_BULLET]" .. Locale.ConvertTextKey("TXT_KEY_TP_GOLD_FROM_RELIGION", iGoldPerTurnFromReligion);
+	end
+	-- Corporations compat: mirror their own income line so their revenue stays visible.
+	if (math.floor(fCorpGold) > 0) then
+		strText = strText .. "[NEWLINE]  [ICON_BULLET]Gold from Corporations: " .. math.floor(fCorpGold);
 	end
 	strText = strText .. "[/COLOR]";
 	local iUnitCost = pPlayer:CalculateUnitCost();

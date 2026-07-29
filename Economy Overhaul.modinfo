@@ -25,6 +25,16 @@ Unlocked progressively by the Currency and Banking technologies. Single-player. 
   <Dependencies>
     <Dlc id="6DA07636-4123-4018-B643-6575B4EC336B" minversion="0" maxversion="999" />
   </Dependencies>
+  <!--
+    Corporations (BNW) also replaces UI/InGame/TopPanel.lua. Only one replacement can win
+    (last mod loaded takes the file), so without this the two mods silently cut each other's
+    top bar. A Reference is NOT a dependency - Corporations is optional - it only means
+    "load after that mod if it is present", which makes our TopPanel deterministically win.
+    TopPanel.lua then folds Corporations' revenue back in, so neither mod loses anything.
+  -->
+  <References>
+    <Mod id="199bbbf8-f80e-449e-a67e-036a7248fb13" minversion="0" maxversion="999" title="Corporations (Brave New World)" />
+  </References>
   <Files>
     <File md5="" import="1">Lua/EcoCurrency.lua</File>
     <File md5="" import="1">Lua/Banking.lua</File>
