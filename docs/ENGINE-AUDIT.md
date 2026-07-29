@@ -21,11 +21,11 @@ section; anything actionable is appended to the [Backlog](#backlog).
 | 2 | Lua entry points & contexts | Entry-point types, VFS replacement, `include()`, per-context `_G` | ☑ complete |
 | 3 | Events & hooks | `GameEvents` vs `Events` vs `LuaEvents`, catalog, cost per turn | ☑ complete |
 | 4 | State & persistence | `MapModData`, `OpenSaveData`, `ScriptData` | ☑ complete |
-| 5 | UI layer | Context XML, controls, `InstanceManager`, tooltips, notifications | ☐ not started |
-| 6 | Gameplay API coverage | Player/City/Unit/Plot methods; exposed vs DLL-only; the money-write problem | ☐ not started |
-| 7 | Performance & correctness | Per-turn cost, caching, `Game.Rand` determinism | ☐ not started |
-| 8 | Compatibility & packaging | Load order, VFS conflicts, `TopPanel` risk, multiplayer, DLC deps | ☐ not started |
-| 9 | Synthesis | Final verdict + prioritised backlog | ☐ not started |
+| 5 | UI layer | Context XML, controls, `InstanceManager`, tooltips, notifications | ☑ complete |
+| 6 | Gameplay API coverage | Player/City/Unit/Plot methods; exposed vs DLL-only; the money-write problem | ☑ complete |
+| 7 | Performance & correctness | Per-turn cost, caching, `Game.Rand` determinism | ☑ complete |
+| 8 | Compatibility & packaging | Load order, VFS conflicts, `TopPanel` risk, multiplayer, DLC deps | ☑ complete |
+| 9 | Synthesis | Final verdict + prioritised backlog | ☑ complete |
 
 **Legend:** ☐ not started · ◐ in progress · ☑ complete
 
@@ -211,23 +211,120 @@ the loaded turn's income and pays it twice.
 
 ## 5. UI layer
 
-_Not started._
+### The full surface
+
+| Mechanism | What it gives you | Conflict risk |
+|-----------|-------------------|---------------|
+| `InGameUIAddin` context (Lua + XML) | Your own panel, fully isolated | **None** |
+| `LuaEvents.AdditionalInformationDropdownGatherEntries` | An entry in the top-right menu | **None** — designed for this |
+| **VFS file replacement** | Override a base-game UI file wholesale | **Total** — last mod loaded wins |
+| `AddNotification` | Engine notification | None (no click event exists) |
+| `InstanceManager` | Repeated rows from an XML template | None |
+
+### What we do
+
+8 addin panels + dropdown registration (zero-conflict), plus **one VFS replacement of
+`UI/InGame/TopPanel.lua`**.
+
+### Verdict — panels are exemplary, `TopPanel` is a landmine
+
+The panels are the right pattern: isolated contexts, dropdown integration, no base files
+touched. Hard-won rules already encoded — `include("InstanceManager")` is not automatic;
+rows need `CalculateSize`/`ReprocessAnchoring`/`CalculateInternalSize` after populating or
+the table renders empty; `TwCenMT` sizes must be even and ≥14; `<ScrollPanelContent>` is not
+a real element; button callbacks receive `(void1, void2)` directly.
+
+The `TopPanel.lua` replacement is the single biggest compatibility risk in the mod — see
+`COMPAT-1`. It is also, unavoidably, the *only* way to modify the existing gold display and
+its tooltip: there is no hook into the base top bar.
 
 ## 6. Gameplay API coverage
 
-_Not started._
+### The money-write problem — design validated
+
+Every `*Times100` method the base game exposes is a **getter**: `GetGoldFromCitiesTimes100`,
+`CalculateGrossGoldTimes100`, `CalculateGoldRateTimes100`, and six more. The only *writers*
+are `ChangeGold` (24 uses) and `SetGold` (28) — both **whole gold only**. There is no
+`SetGoldTimes100` or `ChangeGoldTimes100`.
+
+**Conclusion: the copper-purse design is not merely reasonable, it is the only option.**
+Fractional mod income cannot be written to the engine treasury; holding sub-gold in
+`MapModData` and banking whole gold as it accumulates is the correct workaround.
+
+Note the base game never calls a bare `GetGoldTimes100()` either, so our `pcall`-guarded
+read very likely falls back to `GetGold() * 100`. That is harmless — the purse holds the
+fraction, so the total stays exact — and it vindicates guarding the call.
+
+### Other writers we depend on
+
+| API | Base-game uses | Note |
+|-----|---------------:|------|
+| `ChangeGold` / `SetGold` | 24 / 28 | Well-trodden. |
+| `ChangeNumResourceTotal` | 2 | The only resource writer. Ours is delta-based, which is right. |
+| `ChangeHappiness` | **0** | **No base-game reference implementation** — see `API-1`. |
+
+`ChangeHappiness` having zero base-game usage is worth respecting: it writes a real engine
+value that persists in the save, which is exactly why the removed debt penalty needed an
+unwind migration and why `TaxUnhappiness` must stay persisted.
+
+### Determinism
+
+Base game uses `Game.Rand` (29) alongside `math.random` (25). `Game.Rand` is seeded and
+replay/multiplayer-safe. **We use `Game.Rand` exclusively — correct.**
 
 ## 7. Performance & correctness
 
-_Not started._
+Per-turn cost is dominated by repeated scans that are cheap individually but run per player:
+
+- **`HasBondExchange(pPlayer)` is called twice per player per turn** in `Banking.lua`
+  (lines 168 and 184), each walking that player's whole city list. One call, cached, would
+  do — `PERF-2`.
+- **`EcoWonderOwner` walks every player × every city.** Called once per turn by the stock
+  and commodity engines (fine), plus per-player in Banking behind a short-circuit, plus on
+  every panel refresh — `PERF-1`.
+- **`EcoActiveCurrency()` runs on every money format call** — a `pcall`, a tech lookup and a
+  `GameInfo.Civilizations` join. There are **65** `EcoFormat*` call sites, and table panels
+  invoke them per row per redraw — `PERF-3`.
+
+None of these will be visible on a small map; all are trivially fixable with a per-turn
+cache. Correctness-wise the turn guards (`if turn == LastTurn then return end`) are the
+right pattern and are now persisted, closing the double-pay-on-reload hole.
 
 ## 8. Compatibility & packaging
 
-_Not started._
+- **`TopPanel.lua` collision — `COMPAT-1`, the headline finding.** Corporations (BNW),
+  which is installed, ships its own `UI/InGame/TopPanel.lua`: 1343 lines, 17 corp-specific
+  references, `include("Corp_UI.lua")`, and corporate revenue folded into the gold-per-turn
+  display. Ours is 860 lines with the g/s/c treasury, mod income and capital-market tooltip.
+  VFS replacement is last-one-wins, so **enabling both silently guts one of them**. No error,
+  no warning — just missing UI.
+- Only 7 base-game UI filenames are overridden by *any* installed mod, and `TopPanel.lua` is
+  the only one claimed twice. Our 8 panels collide with nothing.
+- **Packaging is correct:** BNW DLC dependency declared, `SupportsMultiplayer=0` (honest —
+  the mod is not MP-safe: `Game.Rand` is fine but per-context state and OOS risk are not
+  audited), `AffectsSavedGames=1`, stable GUID.
 
 ## 9. Synthesis
 
-_Not started._
+**The architecture is sound.** Every foundational choice the mod makes is the one the
+engine and the mature mod ecosystem support:
+
+- `UpdateDatabase` + XML for content
+- `InGameUIAddin` + an `import="1"` shared include for code
+- the Additional Information dropdown for menu integration
+- `MapModData` working set with `OpenSaveData` write-through for state
+- `Game.Rand` for anything random
+- the copper purse — provably the only way to represent fractional gold
+
+Three of these were previously *assumptions*; this audit turned them into verified facts
+(persistence, the gold-write limitation, the restore-at-include pattern).
+
+**One real problem was found:** the `TopPanel.lua` replacement is mutually exclusive with
+Corporations, which the user has installed. Everything else is efficiency polish.
+
+Recommended order: `COMPAT-1` (real user-visible breakage) → `PST-1` (cheap insurance on
+the one unobserved code path) → `CTX-1` (biggest structural cleanup) → the `PERF-*` items
+(nice, not urgent) → `DB-1`/`EVT-1` (optional).
 
 ---
 
@@ -237,9 +334,14 @@ Severity: **H** = correctness/compat risk · **M** = worth doing · **L** = poli
 
 | ID | Sev | Area | Item | Status |
 |----|-----|------|------|--------|
-| `CTX-1` | M | Contexts | Consolidate the 7 logic addins into 1 entry point. 15 contexts → 9, 7 `PlayerDoTurn` handlers → 1, 7 copies of the shared include → 1. Also removes the cross-context write-back workarounds. | open |
-| `EVT-1` | L | Events | Replace per-turn `HasTech()` polling in Banking/Taxation/Commodity with a cache maintained by `GameEvents.TeamTechResearched`. | open |
+| `COMPAT-1` | **H** | Compatibility | **`UI/InGame/TopPanel.lua` collides with Corporations (BNW), which is installed.** VFS replacement is last-one-wins, so enabling both silently guts one mod's top bar — no error shown. Options: (a) drop the replacement and surface our figures in the Economy Dashboard / a small own-context overlay — zero conflict, slightly less integrated; (b) keep it and document the incompatibility; (c) detect Corporations at load and warn. | open |
 | `PST-1` | M | Persistence | Confirm at runtime that the restore actually fires — print restored share/bond counts once on load. Cheap insurance on the one unobserved path. | open |
+| `CTX-1` | M | Contexts | Consolidate the 7 logic addins into 1 entry point. 15 contexts → 9, 7 `PlayerDoTurn` handlers → 1, 7 copies of the shared include → 1. Also removes the cross-context write-back workarounds. | open |
+| `PERF-1` | M | Performance | `EcoWonderOwner` walks every player × every city; called per panel refresh and per-player in Banking. Cache the owner once per turn (the wonder can only change on construction). | open |
+| `PERF-2` | L | Performance | `HasBondExchange(pPlayer)` called twice per player per turn (`Banking.lua:168` and `:184`), each scanning all that player's cities. Call once, reuse. | open |
+| `PERF-3` | L | Performance | `EcoActiveCurrency()` does a `pcall` + tech lookup + `GameInfo.Civilizations` join on **every** money format call; 65 call sites, invoked per row per redraw. Cache per turn. | open |
+| `API-1` | L | Risk | `ChangeHappiness` has **zero** base-game usage — no reference implementation. Keep `TaxUnhappiness` persisted and treat any future happiness feature as needing an unwind path. | open |
+| `EVT-1` | L | Events | Replace per-turn `HasTech()` polling in Banking/Taxation/Commodity with a cache maintained by `GameEvents.TeamTechResearched`. | open |
 | `PST-2` | L | Persistence | `EcoSaveState()` runs twice per share trade (`SetOwnedShares` + `SetFloat`). Move the call up to the click handler. | open |
 | `DB-1` | L | Database | Move the ~40 balance constants into a custom GameData table so they have one source of truth and are tunable without editing Lua. | open |
 
@@ -260,3 +362,7 @@ Decisions the audit validated, recorded so they are not revisited.
 | Restore point | At first `include()`, guarded by a `MapModData` flag | Byte-for-byte the `Corp_Bootstrap.lua` pattern, and it beats each subsystem's `X = X or {}` defaults. |
 | Save triggers | Per-turn **and** per-mutation | Strictly better than Corporations' per-turn-only, which loses mid-turn trades. |
 | Turn guards persisted | Deliberate | Prevents a reload re-paying the loaded turn's income. |
+| Fractional money | Copper purse in `MapModData`, whole gold banked to the engine | **Provably the only option** — every `*Times100` API is a getter; `ChangeGold`/`SetGold` are whole-gold only. |
+| Randomness | `Game.Rand` everywhere, never `math.random` | Seeded, replay- and multiplayer-safe. |
+| Resource trading | Delta-based `ChangeNumResourceTotal` | The only resource writer the engine exposes. |
+| Panels | Own `InGameUIAddin` contexts + dropdown entry | Zero file conflicts; our 8 panels collide with nothing across 40 installed mods. |
