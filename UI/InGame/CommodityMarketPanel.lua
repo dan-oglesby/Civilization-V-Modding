@@ -69,6 +69,7 @@ local function SetSelling(iPlayer, iRes, qty)
     -- Defensive write-back: reassign the sub-table so the change propagates to the
     -- logic (CommodityMarket.lua) context, which reads it each turn for income.
     MapModData.EcoOverhaul_CmdSelling[iPlayer] = MapModData.EcoOverhaul_CmdSelling[iPlayer]
+    EcoSaveState()   -- persist now: a mid-turn save must not lose this order
 end
 local function GetTiedUp(iPlayer, iRes)
     local t = MapModData.EcoOverhaul_CmdTiedUp and MapModData.EcoOverhaul_CmdTiedUp[iPlayer]
@@ -276,6 +277,7 @@ Controls.AutoSellToggleBtn:RegisterCallback(Mouse.eLClick, function()
     local iPlayer = Game.GetActivePlayer()
     MapModData.EcoOverhaul_AutoSell = MapModData.EcoOverhaul_AutoSell or {}
     MapModData.EcoOverhaul_AutoSell[iPlayer] = not (MapModData.EcoOverhaul_AutoSell[iPlayer] == true)
+    EcoSaveState()
     UpdateAutoSellButton(); RefreshPanel()
 end)
 
@@ -290,6 +292,7 @@ Controls.AutoBuyToggleBtn:RegisterCallback(Mouse.eLClick, function()
     local iPlayer = Game.GetActivePlayer()
     MapModData.EcoOverhaul_AutoBuy = MapModData.EcoOverhaul_AutoBuy or {}
     MapModData.EcoOverhaul_AutoBuy[iPlayer] = not (MapModData.EcoOverhaul_AutoBuy[iPlayer] == true)
+    EcoSaveState()
     UpdateAutoBuyButton(); RefreshPanel()
 end)
 

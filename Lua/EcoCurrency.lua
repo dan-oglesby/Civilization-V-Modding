@@ -302,4 +302,184 @@ function EcoFormatCopper(copper)
     return math.floor((copper or 0) + 0.5) .. "c"
 end
 
+-- ============================================================
+-- Persistence  (Modding.OpenSaveData)
+--
+-- MapModData does NOT survive save/load in Civ5. It is an in-memory table
+-- shared between Lua contexts for the CURRENT SESSION only -- which is why
+-- InfoAddict and Corporations both keep their working state in MapModData
+-- but write it through to Modding.OpenSaveData(), the engine's real per-save
+-- store. Without this layer, a reload wipes every treasury purse, share,
+-- bond and trade position the player owns.
+--
+-- OpenSaveData's SetValue/GetValue take SCALARS only (that is exactly how the
+-- base game's own scenarios use it), so each nested table here is serialised
+-- to one compact string under a single key, and scalars are stored directly.
+--
+-- Civ5 gives Lua no "game is being saved" event, so state is written through
+-- once per turn -- the store is therefore always current whenever the player
+-- saves -- and restored once when the first mod context loads.
+--
+-- EVERYTHING here is pcall-guarded. If persistence fails for any reason the
+-- mod degrades to its previous behaviour (fresh state) rather than erroring.
+-- ============================================================
+
+local ECO_ENTRY_SEP = "~"
+local ECO_FIELD_SEP = "^"
+
+-- Keys must round-trip with their type intact: owned[3] and owned["3"] are
+-- different slots, and the stock table is keyed by strings while the player
+-- tables are keyed by integer IDs.
+local function EcoEncKey(k)
+    if type(k) == "number" then return "n" .. k end
+    return "s" .. tostring(k)
+end
+
+local function EcoDecKey(s)
+    if s == nil or s == "" then return nil end
+    local tag = s:sub(1, 1)
+    if tag == "n" then return tonumber(s:sub(2)) end
+    return s:sub(2)
+end
+
+local function EcoEncVal(v)
+    if type(v) == "boolean" then return v and "b1" or "b0" end
+    return "#" .. tostring(v)
+end
+
+local function EcoDecVal(s)
+    if s == nil or s == "" then return nil end
+    if s:sub(1, 1) == "b" then return s:sub(2) == "1" end
+    return tonumber(s:sub(2))
+end
+
+-- Flattens a 1- or 2-level table into "key^subkey^value" entries; depth-1
+-- entries simply leave the middle field empty.
+local function EcoSerialize(tbl)
+    if type(tbl) ~= "table" then return "" end
+    local out = {}
+    for k, v in pairs(tbl) do
+        if type(v) == "table" then
+            for k2, v2 in pairs(v) do
+                if type(v2) ~= "table" then
+                    out[#out + 1] = EcoEncKey(k) .. ECO_FIELD_SEP .. EcoEncKey(k2) .. ECO_FIELD_SEP .. EcoEncVal(v2)
+                end
+            end
+        else
+            out[#out + 1] = EcoEncKey(k) .. ECO_FIELD_SEP .. ECO_FIELD_SEP .. EcoEncVal(v)
+        end
+    end
+    return table.concat(out, ECO_ENTRY_SEP)
+end
+
+local function EcoDeserialize(str)
+    local t = {}
+    if type(str) ~= "string" or str == "" then return t end
+    for entry in string.gmatch(str, "[^" .. ECO_ENTRY_SEP .. "]+") do
+        local f1, f2, f3 = string.match(entry, "^([^%^]*)%^([^%^]*)%^(.*)$")
+        local k1  = EcoDecKey(f1)
+        local val = EcoDecVal(f3)
+        if k1 ~= nil and val ~= nil then
+            if f2 == "" then
+                t[k1] = val
+            else
+                local k2 = EcoDecKey(f2)
+                if k2 ~= nil then
+                    if type(t[k1]) ~= "table" then t[k1] = {} end
+                    t[k1][k2] = val
+                end
+            end
+        end
+    end
+    return t
+end
+
+-- Scalars, stored directly. (Turn guards are included on purpose: without them a
+-- reload would re-run the loaded turn's income and pay it twice.)
+local ECO_SCALARS = {
+    "SavingsRate", "PrevSavingsRate", "TotalSavings", "CorpDebt", "BorrowedPct", "LastRateTurn",
+    "Climate", "ClimateTarget", "ClimatePhaseLeft", "ClimateTurn", "CrisisCooldown",
+    "ClimateLabel", "ClimatePrevLabel",
+    "StockTurn", "StockVolume", "StockExchangeOwner", "StockExchangeCut",
+    "CmdPricesTurn", "CmdVolume", "CmdExchangeOwner", "CmdExchangeCut",
+    "BondTurn", "NetWorthTurn", "NWLeader", "NWDominanceFlagged",
+}
+
+-- SetValue has no boolean type, so these ride as 1/0 and are restored as booleans.
+local ECO_BOOL_SCALARS = { NWDominanceFlagged = true }
+
+-- Nested tables, one serialised string each. Pure display values (this turn's
+-- interest/dividends/revenue) are deliberately omitted -- they are recomputed
+-- on the next turn and are not worth the bytes.
+local ECO_TABLES = {
+    "Copper", "IndexPool", "IndexAutoInvest",
+    "StockPrices", "StockPrevPrices", "StockFairVals", "StockFloat",
+    "StockOwned", "DividendPool", "ReinvestOn",
+    "CmdPrices", "CmdPrevPrices", "CmdMarketAvail",
+    "CmdSelling", "CmdTiedUp", "AutoSell", "AutoBuy",
+    "BondHoldings",
+    "TaxRate", "TaxUnhappiness",
+    "NetWorth",
+}
+
+-- Write the whole mod state through to the save store.
+function EcoSaveState()
+    pcall(function()
+        local db = Modding.OpenSaveData()
+        if db == nil then return end
+        for _, k in ipairs(ECO_SCALARS) do
+            local v = MapModData["EcoOverhaul_" .. k]
+            if v ~= nil then
+                if type(v) == "boolean" then v = v and 1 or 0 end
+                db.SetValue("EcoOverhaul_" .. k, v)
+            end
+        end
+        for _, k in ipairs(ECO_TABLES) do
+            db.SetValue("EcoOverhaulT_" .. k, EcoSerialize(MapModData["EcoOverhaul_" .. k]))
+        end
+        db.SetValue("EcoOverhaul_Saved", 1)   -- marker: distinguishes a loaded game from a new one
+    end)
+end
+
+-- Restore state saved by a previous session. No-op on a brand-new game.
+function EcoLoadState()
+    local ok = pcall(function()
+        local db = Modding.OpenSaveData()
+        if db == nil then return end
+        if db.GetValue("EcoOverhaul_Saved") == nil then return end   -- new game: nothing to restore
+        for _, k in ipairs(ECO_SCALARS) do
+            local v = db.GetValue("EcoOverhaul_" .. k)
+            if v ~= nil then
+                if ECO_BOOL_SCALARS[k] then v = (v == 1) or (v == true) end
+                MapModData["EcoOverhaul_" .. k] = v
+            end
+        end
+        for _, k in ipairs(ECO_TABLES) do
+            local s = db.GetValue("EcoOverhaulT_" .. k)
+            if type(s) == "string" and s ~= "" then
+                MapModData["EcoOverhaul_" .. k] = EcoDeserialize(s)
+            end
+        end
+    end)
+    if not ok then print("Economy Overhaul: state restore failed; continuing with fresh state.") end
+    return ok
+end
+
+-- Bootstrap. EcoCurrency is include()d at the TOP of every Economy Overhaul file,
+-- so the first context to load restores state BEFORE any subsystem runs its
+-- `MapModData.X = MapModData.X or {}` defaults -- those then keep the restored
+-- tables instead of overwriting them. The guards make both steps idempotent
+-- across the 15 contexts that include this file.
+if not MapModData.EcoOverhaul_StateRestored then
+    MapModData.EcoOverhaul_StateRestored = true
+    EcoLoadState()
+end
+
+if not MapModData.EcoOverhaul_PersistHooked then
+    MapModData.EcoOverhaul_PersistHooked = true
+    -- Fires once per game turn, after every civ's PlayerDoTurn work is done and
+    -- immediately before the player can reach the save menu.
+    Events.ActivePlayerTurnStart.Add(EcoSaveState)
+end
+
 print("Economy Overhaul: EcoCurrency.lua loaded.")

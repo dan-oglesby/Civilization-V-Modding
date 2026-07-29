@@ -37,6 +37,7 @@ end
 local function SetRate(iPlayer, rate)
     if MapModData.EcoOverhaul_TaxRate == nil then MapModData.EcoOverhaul_TaxRate = {} end
     MapModData.EcoOverhaul_TaxRate[iPlayer] = math.max(0, math.min(TAX_MAX, rate))
+    EcoSaveState()
 end
 
 -- ============================================================

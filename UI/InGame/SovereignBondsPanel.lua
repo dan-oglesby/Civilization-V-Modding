@@ -30,6 +30,7 @@ local function SetHoldings(iHolder, iIssuer, units)
     if MapModData.EcoOverhaul_BondHoldings[iHolder] == nil then MapModData.EcoOverhaul_BondHoldings[iHolder] = {} end
     MapModData.EcoOverhaul_BondHoldings[iHolder][iIssuer] = math.max(0, units)
     MapModData.EcoOverhaul_BondHoldings[iHolder] = MapModData.EcoOverhaul_BondHoldings[iHolder]
+    EcoSaveState()   -- persist now: a mid-turn save must not lose this trade
 end
 local function GetPrice(iIssuer)
     return (MapModData.EcoOverhaul_BondPrice and MapModData.EcoOverhaul_BondPrice[iIssuer]) or FACE_VALUE

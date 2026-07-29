@@ -52,6 +52,21 @@ UI/InGame/                 # panels (one per subsystem) + TopPanel.lua (BNW top-
 XML/Buildings/             # Bond Exchange, Commodity Exchange, Global Stock Market wonders
 ```
 
+## Saved-game persistence
+
+`MapModData` does **not** survive save/load in Civ V — it is an in-memory table shared
+between Lua contexts for the current session only. Anything kept solely there (treasury
+purses, share and bond holdings, trade positions, tax rates) is silently lost on reload.
+
+`Lua/EcoCurrency.lua` therefore writes the mod's state through to `Modding.OpenSaveData()`,
+the engine's real per-save store. Since `SetValue`/`GetValue` accept scalars only, each
+nested table is serialised to a single compact string; scalars are stored directly. State
+is written on every turn *and* immediately after any panel action that changes it (so a
+mid-turn save can't lose a trade), and restored once when the first mod context loads.
+
+The whole layer is `pcall`-guarded: if persistence ever fails, the mod falls back to
+fresh state rather than erroring.
+
 ## Design notes
 
 Two features were built and then deliberately removed; both are preserved in git history.

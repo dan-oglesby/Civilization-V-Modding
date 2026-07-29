@@ -61,6 +61,7 @@ Controls.ReinvestToggleBtn:RegisterCallback(Mouse.eLClick, function()
             if payout > 0 then EcoChangeCopper(pPlayer, payout); MapModData.EcoOverhaul_DividendPool[iPlayer] = pool end   -- pool is copper
         end
     end
+    EcoSaveState()
     UpdateReinvestButton(); RefreshStocks()
 end)
 
@@ -82,6 +83,7 @@ Controls.AutoInvestToggleBtn:RegisterCallback(Mouse.eLClick, function()
     local on = (MapModData.EcoOverhaul_IndexAutoInvest[iPlayer] ~= false)
     MapModData.EcoOverhaul_IndexAutoInvest[iPlayer] = (not on)
     MapModData.EcoOverhaul_IndexAutoInvest = MapModData.EcoOverhaul_IndexAutoInvest  -- defensive cross-context write-back
+    EcoSaveState()
     RefreshStocks()
 end)
 
@@ -98,6 +100,7 @@ local function SetOwnedShares(iPlayer, key, qty)
     if MapModData.EcoOverhaul_StockOwned[iPlayer] == nil then MapModData.EcoOverhaul_StockOwned[iPlayer] = {} end
     MapModData.EcoOverhaul_StockOwned[iPlayer][key] = math.max(0, qty)
     MapModData.EcoOverhaul_StockOwned[iPlayer] = MapModData.EcoOverhaul_StockOwned[iPlayer]
+    EcoSaveState()   -- persist now: a mid-turn save must not lose this trade
 end
 local function GetFloat(key)
     return (MapModData.EcoOverhaul_StockFloat and MapModData.EcoOverhaul_StockFloat[key]) or TOTAL_SHARES
@@ -105,6 +108,7 @@ end
 local function SetFloat(key, qty)
     if MapModData.EcoOverhaul_StockFloat == nil then MapModData.EcoOverhaul_StockFloat = {} end
     MapModData.EcoOverhaul_StockFloat[key] = math.max(0, math.min(TOTAL_SHARES, qty))
+    EcoSaveState()
 end
 local function TrendStr(key)
     local cur  = (MapModData.EcoOverhaul_StockPrices     and MapModData.EcoOverhaul_StockPrices[key])     or BASE_PRICE
